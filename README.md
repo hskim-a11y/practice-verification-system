@@ -58,7 +58,9 @@ open practice-verification-full.html
 
 ### 방법 3: GitHub Pages (추천)
 
-> **곧 제공 예정**: GitHub Pages를 통해 별도 설치 없이 바로 사용 가능합니다.
+**🚀 라이브 데모**: https://hskim-a11y.github.io/practice-verification-system/
+
+별도 설치 없이 바로 사용 가능합니다!
 
 ## 사용 방법
 
