@@ -33,14 +33,40 @@
 └── README.md
 ```
 
+## 빠른 시작
+
+### 방법 1: 레포지토리 클론 후 실행
+
+```bash
+# 1. 레포지토리 클론
+git clone https://github.com/hskim-a11y/practice-verification-system.git
+
+# 2. 디렉토리 이동
+cd practice-verification-system
+
+# 3. HTML 파일을 브라우저에서 열기
+open practice-verification-full.html
+# Windows: start practice-verification-full.html
+# Linux: xdg-open practice-verification-full.html
+```
+
+### 방법 2: 직접 다운로드
+
+1. [여기](https://github.com/hskim-a11y/practice-verification-system/blob/main/practice-verification-full.html)에서 "Raw" 버튼 클릭
+2. 페이지를 `.html` 파일로 저장 (Cmd+S 또는 Ctrl+S)
+3. 저장한 파일을 브라우저에서 열기
+
+### 방법 3: GitHub Pages (추천)
+
+> **곧 제공 예정**: GitHub Pages를 통해 별도 설치 없이 바로 사용 가능합니다.
+
 ## 사용 방법
 
-1. `practice-verification-full.html` 파일을 브라우저에서 열기
-2. 체크리스트의 "실습 인증하기" 버튼 클릭
-3. 스크린샷 업로드 (드래그 앤 드롭, 붙여넣기, 또는 파일 선택)
-4. 제출하여 실습 인증 완료
-5. Step Indicator 클릭으로 수동 체크 가능
-6. 채팅 탭에서 다른 학습자들과 소통
+1. 체크리스트의 "실습 인증하기" 버튼 클릭
+2. 스크린샷 업로드 (드래그 앤 드롭, 붙여넣기, 또는 파일 선택)
+3. 제출하여 실습 인증 완료
+4. Step Indicator 클릭으로 수동 체크 가능
+5. 채팅 탭에서 다른 학습자들과 소통
 
 ## 기술 스택
 
