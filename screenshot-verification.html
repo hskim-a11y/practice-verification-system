@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스크린샷 기반 실습 인증 시스템</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f4f4f5;
+            color: #3f4146;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* 실습 챕터 리스트 */
+        .chapter-list {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .chapter {
+            display: flex;
+            gap: 12px;
+            padding: 16px;
+            border: 1px solid #e4e4e7;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+
+        .chapter-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .chapter.pending .chapter-number {
+            background: #f4f4f5;
+            color: #71717a;
+        }
+
+        .chapter.waiting .chapter-number {
+            background: #e0f2fe;
+            color: #0ea5e9;
+        }
+
+        .chapter.approved .chapter-number {
+            background: #dcfce7;
+            color: #22c55e;
+        }
+
+        .chapter.rejected .chapter-number {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+
+        .chapter-content {
+            flex: 1;
+        }
+
+        .chapter-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .chapter-status {
+            font-size: 13px;
+            color: #71717a;
+        }
+
+        .chapter-feedback {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: #fef2f2;
+            border-left: 3px solid #ef4444;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #991b1b;
+        }
+
+        .verify-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .verify-btn.primary {
+            background: #ff6900;
+            color: white;
+        }
+
+        .verify-btn.primary:hover {
+            background: #e65f00;
+        }
+
+        .verify-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 모달 */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(16, 24, 40, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.2s;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 480px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.3s;
+            position: relative;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            padding: 20px 24px 12px;
+            border-bottom: 1px solid #f4f4f5;
+        }
+
+        .modal-subtitle {
+            font-size: 13px;
+            font-weight: 700;
+            color: #71717a;
+            margin-bottom: 8px;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #09090b;
+            margin-bottom: 8px;
+        }
+
+        .modal-description {
+            font-size: 14px;
+            color: #71717a;
+            line-height: 1.5;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 24px;
+            color: #71717a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .close-btn:hover {
+            background: #f4f4f5;
+        }
+
+        /* 업로드 영역 */
+        .upload-area {
+            border: 2px dashed #e4e4e7;
+            background: #fafafa;
+            border-radius: 8px;
+            padding: 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 16px;
+        }
+
+        .upload-area:hover {
+            border-color: #ff6900;
+            background: #fff5ed;
+        }
+
+        .upload-area.drag-over {
+            border-color: #ff6900;
+            background: #fff5ed;
+        }
+
+        .upload-area.has-file {
+            border: 2px solid #22c55e;
+            background: #f0fdf4;
+        }
+
+        .upload-icon {
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+
+        .upload-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #3f4146;
+            margin-bottom: 8px;
+        }
+
+        .upload-hint {
+            font-size: 12px;
+            color: #71717a;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* 이미지 미리보기 */
+        .image-preview {
+            position: relative;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .image-preview.active {
+            display: block;
+        }
+
+        .preview-image {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #e4e4e7;
+        }
+
+        .remove-image-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .remove-image-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+
+        .zoom-controls {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            display: flex;
+            gap: 4px;
+        }
+
+        .zoom-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .zoom-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+
+        /* 업로드 진행률 */
+        .upload-progress {
+            display: none;
+            margin-bottom: 16px;
+        }
+
+        .upload-progress.active {
+            display: block;
+        }
+
+        .progress-label {
+            font-size: 13px;
+            color: #71717a;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #f4f4f5;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #ff6900;
+            transition: width 0.3s ease;
+        }
+
+        /* 에러 메시지 */
+        .error-message {
+            display: none;
+            padding: 12px 16px;
+            background: #fef2f2;
+            border-left: 3px solid #ef4444;
+            border-radius: 4px;
+            margin-bottom: 16px;
+        }
+
+        .error-message.active {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .error-icon {
+            color: #ef4444;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .error-text {
+            font-size: 13px;
+            color: #991b1b;
+            flex: 1;
+        }
+
+        /* 성공 메시지 */
+        .success-message {
+            display: none;
+            padding: 12px 16px;
+            background: #f0fdf4;
+            border-left: 3px solid #22c55e;
+            border-radius: 4px;
+            margin-bottom: 16px;
+        }
+
+        .success-message.active {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .success-icon {
+            color: #22c55e;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .success-text {
+            font-size: 13px;
+            color: #166534;
+            flex: 1;
+        }
+
+        /* 경고 메시지 */
+        .warning-box {
+            padding: 12px 16px;
+            background: #fffbeb;
+            border-left: 3px solid #f59e0b;
+            border-radius: 4px;
+            margin-bottom: 16px;
+        }
+
+        .warning-icon {
+            color: #f59e0b;
+            font-size: 16px;
+            margin-right: 8px;
+        }
+
+        .warning-text {
+            font-size: 13px;
+            color: #92400e;
+            line-height: 1.5;
+        }
+
+        /* 버튼 그룹 */
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .modal-btn.secondary {
+            background: white;
+            color: #71717a;
+            border: 1px solid #b5b5ba;
+        }
+
+        .modal-btn.secondary:hover {
+            background: #fafafa;
+        }
+
+        .modal-btn.primary {
+            background: #ff6900;
+            color: white;
+        }
+
+        .modal-btn.primary:hover {
+            background: #e65f00;
+        }
+
+        .modal-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .modal-btn.loading {
+            position: relative;
+            color: transparent;
+        }
+
+        .modal-btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid white;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 스크린샷 버튼 */
+        .screenshot-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: white;
+            border: 1px solid #e4e4e7;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #71717a;
+            margin-bottom: 16px;
+            transition: all 0.2s;
+        }
+
+        .screenshot-btn:hover {
+            background: #f4f4f5;
+            border-color: #b5b5ba;
+        }
+
+        .screenshot-icon {
+            font-size: 16px;
+        }
+
+        /* 파일 정보 */
+        .file-info {
+            display: none;
+            padding: 12px 16px;
+            background: #f9fafb;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+
+        .file-info.active {
+            display: block;
+        }
+
+        .file-info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .file-info-label {
+            color: #71717a;
+        }
+
+        .file-info-value {
+            color: #3f4146;
+            font-weight: 500;
+        }
+
+        /* 토스트 알림 */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #09090b;
+            color: white;
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            display: none;
+            align-items: center;
+            gap: 12px;
+            max-width: 400px;
+            z-index: 2000;
+            animation: slideInRight 0.3s;
+        }
+
+        .toast.active {
+            display: flex;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(400px); }
+            to { transform: translateX(0); }
+        }
+
+        .toast-icon {
+            font-size: 20px;
+        }
+
+        .toast-text {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .toast.success {
+            background: #22c55e;
+        }
+
+        .toast.error {
+            background: #ef4444;
+        }
+
+        /* 확인 모달 */
+        .confirm-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(16, 24, 40, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+        }
+
+        .confirm-modal.active {
+            display: flex;
+        }
+
+        .confirm-dialog {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 400px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        .confirm-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #09090b;
+            margin-bottom: 12px;
+        }
+
+        .confirm-message {
+            font-size: 14px;
+            color: #71717a;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .confirm-btn {
+            flex: 1;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+        }
+
+        .confirm-btn.cancel {
+            background: white;
+            color: #71717a;
+            border: 1px solid #e4e4e7;
+        }
+
+        .confirm-btn.confirm {
+            background: #ef4444;
+            color: white;
+        }
+
+        /* 다중 이미지 지원 */
+        .image-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .image-item {
+            position: relative;
+            border: 1px solid #e4e4e7;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .image-item img {
+            width: 100%;
+            display: block;
+        }
+
+        .image-item-actions {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: flex;
+            gap: 4px;
+        }
+
+        .image-count {
+            font-size: 12px;
+            color: #71717a;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="margin-bottom: 24px; font-size: 24px; font-weight: 600;">실습 인증 시스템</h1>
+
+        <!-- 챕터 리스트 -->
+        <div class="chapter-list">
+            <!-- 챕터 1: 승인됨 -->
+            <div class="chapter approved" data-chapter="1">
+                <div class="chapter-number">✓</div>
+                <div class="chapter-content">
+                    <div class="chapter-title">1. Google Cloud Platform 설정</div>
+                    <div class="chapter-status">✅ 승인됨 - 강사가 확인했습니다</div>
+                </div>
+                <button class="verify-btn" style="background: #e5e7eb; color: #6b7280; cursor: default;" disabled>
+                    제출 완료
+                </button>
+            </div>
+
+            <!-- 챕터 2: 대기 중 -->
+            <div class="chapter waiting" data-chapter="2">
+                <div class="chapter-number">2</div>
+                <div class="chapter-content">
+                    <div class="chapter-title">2. Google Forms & 스프레드시트 연결</div>
+                    <div class="chapter-status">⏳ 검토 대기 중 - 강사가 곧 확인합니다</div>
+                </div>
+                <button class="verify-btn" style="background: #e5e7eb; color: #6b7280; cursor: default;" disabled>
+                    검토 대기 중
+                </button>
+            </div>
+
+            <!-- 챕터 3: 재제출 필요 -->
+            <div class="chapter rejected" data-chapter="3">
+                <div class="chapter-number">3</div>
+                <div class="chapter-content">
+                    <div class="chapter-title">3. Apps Script 설정</div>
+                    <div class="chapter-status">❌ 재제출 필요</div>
+                    <div class="chapter-feedback">
+                        <strong>강사 피드백:</strong> Apps Script 편집기가 아닌 Google Forms 화면이 제출되었습니다. Apps Script 코드가 보이는 화면을 캡처해주세요.
+                    </div>
+                </div>
+                <button class="verify-btn primary" onclick="openModal(3, true)">
+                    📋 다시 제출하기
+                </button>
+            </div>
+
+            <!-- 챕터 4: 미제출 -->
+            <div class="chapter pending" data-chapter="4">
+                <div class="chapter-number">4</div>
+                <div class="chapter-content">
+                    <div class="chapter-title">4. 트리거 설정 및 테스트</div>
+                    <div class="chapter-status">📝 제출 필요</div>
+                </div>
+                <button class="verify-btn primary" onclick="openModal(4, false)">
+                    📋 실습 인증하기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 인증 모달 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <button class="close-btn" onclick="attemptCloseModal()">×</button>
+
+            <div class="modal-header">
+                <div class="modal-subtitle" id="modalSubtitle">체크리스트 1. Google Cloud 설정</div>
+                <h2 class="modal-title">미션을 수행한 후 스크린샷을 제출해주세요!</h2>
+                <p class="modal-description" id="modalDescription">
+                    Google Forms에서 응답을 스프레드시트에 자동 저장되도록 설정하고, 연결된 Google Sheet 화면을 스크린샷으로 제출하세요.
+                </p>
+            </div>
+
+            <div class="modal-body">
+                <!-- 재제출인 경우 강사 피드백 표시 -->
+                <div class="warning-box" id="resubmitWarning" style="display: none;">
+                    <span class="warning-icon">⚠️</span>
+                    <span class="warning-text" id="instructorFeedback"></span>
+                </div>
+
+                <!-- 개인정보 경고 -->
+                <div class="warning-box">
+                    <span class="warning-icon">🔒</span>
+                    <span class="warning-text">
+                        <strong>제출 전 확인하세요:</strong> 스크린샷에 개인정보(이메일, API 키, 비밀번호 등)가 포함되지 않았는지 확인해주세요.
+                    </span>
+                </div>
+
+                <!-- 에러 메시지 -->
+                <div class="error-message" id="errorMessage">
+                    <span class="error-icon">⚠️</span>
+                    <span class="error-text" id="errorText"></span>
+                </div>
+
+                <!-- 성공 메시지 -->
+                <div class="success-message" id="successMessage">
+                    <span class="success-icon">✓</span>
+                    <span class="success-text">이미지가 성공적으로 업로드되었습니다!</span>
+                </div>
+
+                <!-- 업로드 진행률 -->
+                <div class="upload-progress" id="uploadProgress">
+                    <div class="progress-label">
+                        <span>업로드 중...</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- 이미지 미리보기 -->
+                <div class="image-preview" id="imagePreview">
+                    <img id="previewImg" class="preview-image" alt="미리보기">
+                    <button class="remove-image-btn" onclick="removeImage()">×</button>
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" onclick="zoomImage(false)">−</button>
+                        <button class="zoom-btn" onclick="zoomImage(true)">+</button>
+                    </div>
+                </div>
+
+                <!-- 파일 정보 -->
+                <div class="file-info" id="fileInfo">
+                    <div class="file-info-row">
+                        <span class="file-info-label">파일명:</span>
+                        <span class="file-info-value" id="fileName"></span>
+                    </div>
+                    <div class="file-info-row">
+                        <span class="file-info-label">크기:</span>
+                        <span class="file-info-value" id="fileSize"></span>
+                    </div>
+                    <div class="file-info-row">
+                        <span class="file-info-label">형식:</span>
+                        <span class="file-info-value" id="fileType"></span>
+                    </div>
+                </div>
+
+                <!-- 업로드 영역 -->
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-icon">📸</div>
+                    <div class="upload-text">이미지 파일을 업로드 해주세요.</div>
+                    <div class="upload-hint">사용가능한 확장자: JPEG, PNG (최대 5MB)</div>
+                    <div class="upload-hint" style="margin-top: 8px;">또는 Ctrl+V로 클립보드에서 붙여넣기</div>
+                </div>
+                <input type="file" id="fileInput" class="file-input" accept="image/jpeg,image/png" onchange="handleFileSelect(event)">
+
+                <!-- 스크린샷 버튼 -->
+                <button class="screenshot-btn" onclick="captureScreenshot()">
+                    <span class="screenshot-icon">📷</span>
+                    <span>스크린샷 찍기</span>
+                </button>
+
+                <!-- 버튼 그룹 -->
+                <div class="modal-actions">
+                    <button class="modal-btn secondary" onclick="attemptCloseModal()">취소</button>
+                    <button class="modal-btn primary" id="submitBtn" disabled onclick="submitImage()">공유하기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 확인 모달 -->
+    <div class="confirm-modal" id="confirmModal">
+        <div class="confirm-dialog">
+            <h3 class="confirm-title">정말 닫으시겠습니까?</h3>
+            <p class="confirm-message">업로드한 이미지가 저장되지 않습니다. 정말 닫으시겠습니까?</p>
+            <div class="confirm-actions">
+                <button class="confirm-btn cancel" onclick="cancelClose()">계속 작업하기</button>
+                <button class="confirm-btn confirm" onclick="confirmClose()">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 토스트 알림 -->
+    <div class="toast" id="toast">
+        <span class="toast-icon">✓</span>
+        <span class="toast-text" id="toastText"></span>
+    </div>
+
+    <script>
+        let currentChapter = null;
+        let currentFile = null;
+        let isResubmit = false;
+        let hasUnsavedChanges = false;
+        let zoomLevel = 1;
+
+        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+        const ALLOWED_TYPES = ['image/jpeg', 'image/png'];
+
+        // 모달 열기
+        function openModal(chapter, resubmit) {
+            currentChapter = chapter;
+            isResubmit = resubmit;
+            hasUnsavedChanges = false;
+
+            const modal = document.getElementById('modalOverlay');
+            const subtitle = document.getElementById('modalSubtitle');
+            const description = document.getElementById('modalDescription');
+            const resubmitWarning = document.getElementById('resubmitWarning');
+            const instructorFeedback = document.getElementById('instructorFeedback');
+
+            subtitle.textContent = `체크리스트 ${chapter}. 실습 단계 ${chapter}`;
+
+            // 재제출인 경우 강사 피드백 표시
+            if (resubmit) {
+                resubmitWarning.style.display = 'block';
+                instructorFeedback.innerHTML = '<strong>강사 피드백:</strong> Apps Script 편집기가 아닌 Google Forms 화면이 제출되었습니다. Apps Script 코드가 보이는 화면을 캡처해주세요.';
+            } else {
+                resubmitWarning.style.display = 'none';
+            }
+
+            resetModal();
+            modal.classList.add('active');
+        }
+
+        // 모달 닫기 시도
+        function attemptCloseModal() {
+            if (hasUnsavedChanges) {
+                document.getElementById('confirmModal').classList.add('active');
+            } else {
+                closeModal();
+            }
+        }
+
+        // 닫기 취소
+        function cancelClose() {
+            document.getElementById('confirmModal').classList.remove('active');
+        }
+
+        // 닫기 확인
+        function confirmClose() {
+            document.getElementById('confirmModal').classList.remove('active');
+            closeModal();
+        }
+
+        // 모달 닫기
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            resetModal();
+        }
+
+        // 모달 초기화
+        function resetModal() {
+            currentFile = null;
+            hasUnsavedChanges = false;
+            zoomLevel = 1;
+
+            document.getElementById('uploadArea').classList.remove('has-file');
+            document.getElementById('imagePreview').classList.remove('active');
+            document.getElementById('fileInfo').classList.remove('active');
+            document.getElementById('errorMessage').classList.remove('active');
+            document.getElementById('successMessage').classList.remove('active');
+            document.getElementById('uploadProgress').classList.remove('active');
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('previewImg').style.transform = 'scale(1)';
+        }
+
+        // 드래그 앤 드롭 설정
+        const uploadArea = document.getElementById('uploadArea');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // 클립보드 붙여넣기
+        document.addEventListener('paste', (e) => {
+            if (!document.getElementById('modalOverlay').classList.contains('active')) return;
+
+            const items = e.clipboardData.items;
+            for (let item of items) {
+                if (item.type.indexOf('image') !== -1) {
+                    const file = item.getAsFile();
+                    handleFile(file);
+                    showToast('클립보드에서 이미지를 붙여넣었습니다!', 'success');
+                    break;
+                }
+            }
+        });
+
+        // 파일 선택
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        // 파일 처리
+        function handleFile(file) {
+            hideError();
+
+            // 파일 형식 검증
+            if (!ALLOWED_TYPES.includes(file.type)) {
+                showError('JPEG 또는 PNG 형식의 이미지만 업로드 가능합니다.');
+                return;
+            }
+
+            // 파일 크기 검증
+            if (file.size > MAX_FILE_SIZE) {
+                showError(`파일 크기가 너무 큽니다. 최대 ${formatFileSize(MAX_FILE_SIZE)}까지 업로드 가능합니다.`);
+                return;
+            }
+
+            currentFile = file;
+            hasUnsavedChanges = true;
+
+            // 업로드 진행 시뮬레이션
+            simulateUpload(file);
+        }
+
+        // 업로드 시뮬레이션
+        function simulateUpload(file) {
+            const progressDiv = document.getElementById('uploadProgress');
+            const progressFill = document.getElementById('progressFill');
+            const progressPercent = document.getElementById('progressPercent');
+
+            progressDiv.classList.add('active');
+            document.getElementById('uploadArea').style.display = 'none';
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 30;
+                if (progress > 100) progress = 100;
+
+                progressFill.style.width = progress + '%';
+                progressPercent.textContent = Math.round(progress) + '%';
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        progressDiv.classList.remove('active');
+                        showPreview(file);
+                        showSuccess();
+                    }, 300);
+                }
+            }, 200);
+        }
+
+        // 미리보기 표시
+        function showPreview(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('previewImg').src = e.target.result;
+                document.getElementById('imagePreview').classList.add('active');
+                document.getElementById('fileInfo').classList.add('active');
+                document.getElementById('uploadArea').classList.add('has-file');
+
+                // 파일 정보 표시
+                document.getElementById('fileName').textContent = file.name;
+                document.getElementById('fileSize').textContent = formatFileSize(file.size);
+                document.getElementById('fileType').textContent = file.type.split('/')[1].toUpperCase();
+
+                // 제출 버튼 활성화
+                document.getElementById('submitBtn').disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 이미지 삭제
+        function removeImage() {
+            if (confirm('이미지를 삭제하시겠습니까?')) {
+                currentFile = null;
+                hasUnsavedChanges = false;
+
+                document.getElementById('imagePreview').classList.remove('active');
+                document.getElementById('fileInfo').classList.remove('active');
+                document.getElementById('uploadArea').classList.remove('has-file');
+                document.getElementById('uploadArea').style.display = 'block';
+                document.getElementById('submitBtn').disabled = true;
+                hideSuccess();
+            }
+        }
+
+        // 이미지 줌
+        function zoomImage(zoomIn) {
+            const img = document.getElementById('previewImg');
+            if (zoomIn) {
+                zoomLevel = Math.min(zoomLevel + 0.2, 3);
+            } else {
+                zoomLevel = Math.max(zoomLevel - 0.2, 0.5);
+            }
+            img.style.transform = `scale(${zoomLevel})`;
+        }
+
+        // 스크린샷 캡처
+        async function captureScreenshot() {
+            try {
+                // 화면 캡처 API 사용 시도
+                if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+                    const stream = await navigator.mediaDevices.getDisplayMedia({
+                        video: { mediaSource: 'screen' }
+                    });
+
+                    const video = document.createElement('video');
+                    video.srcObject = stream;
+                    video.play();
+
+                    video.onloadedmetadata = () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(video, 0, 0);
+
+                        stream.getTracks().forEach(track => track.stop());
+
+                        canvas.toBlob((blob) => {
+                            const file = new File([blob], `screenshot-${Date.now()}.png`, { type: 'image/png' });
+                            handleFile(file);
+                        }, 'image/png');
+                    };
+                } else {
+                    // API 미지원 시 안내
+                    const os = getOS();
+                    let shortcut = '';
+                    if (os === 'Mac') shortcut = 'Cmd + Shift + 4';
+                    else if (os === 'Windows') shortcut = 'Windows + Shift + S';
+                    else shortcut = '화면 캡처 도구';
+
+                    showError(`브라우저가 화면 캡처를 지원하지 않습니다. ${shortcut}를 사용하여 스크린샷을 찍고 업로드해주세요.`);
+                }
+            } catch (error) {
+                if (error.name === 'NotAllowedError') {
+                    showError('화면 캡처 권한이 거부되었습니다. 수동으로 스크린샷을 찍어 업로드해주세요.');
+                } else {
+                    showError('스크린샷 캡처 중 오류가 발생했습니다.');
+                }
+            }
+        }
+
+        // OS 감지
+        function getOS() {
+            const userAgent = window.navigator.userAgent;
+            if (userAgent.indexOf('Mac') !== -1) return 'Mac';
+            if (userAgent.indexOf('Win') !== -1) return 'Windows';
+            if (userAgent.indexOf('Linux') !== -1) return 'Linux';
+            return 'Unknown';
+        }
+
+        // 이미지 제출
+        function submitImage() {
+            if (!currentFile) {
+                showError('이미지를 먼저 업로드해주세요.');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+
+            // 제출 시뮬레이션 (2초)
+            setTimeout(() => {
+                // 70% 확률로 성공
+                const success = Math.random() > 0.3;
+
+                submitBtn.classList.remove('loading');
+
+                if (success) {
+                    // 성공
+                    hasUnsavedChanges = false;
+                    closeModal();
+                    updateChapterStatus(currentChapter, 'waiting');
+                    showToast('실습 인증이 제출되었습니다! 강사가 곧 확인합니다.', 'success');
+                } else {
+                    // 실패
+                    submitBtn.disabled = false;
+                    showError('제출 중 오류가 발생했습니다. 인터넷 연결을 확인하고 다시 시도해주세요.');
+                }
+            }, 2000);
+        }
+
+        // 챕터 상태 업데이트
+        function updateChapterStatus(chapter, status) {
+            const chapterDiv = document.querySelector(`[data-chapter="${chapter}"]`);
+            const statusText = chapterDiv.querySelector('.chapter-status');
+            const btn = chapterDiv.querySelector('.verify-btn');
+
+            chapterDiv.className = `chapter ${status}`;
+
+            if (status === 'waiting') {
+                statusText.textContent = '⏳ 검토 대기 중 - 강사가 곧 확인합니다';
+                btn.textContent = '검토 대기 중';
+                btn.className = 'verify-btn';
+                btn.style.background = '#e5e7eb';
+                btn.style.color = '#6b7280';
+                btn.style.cursor = 'default';
+                btn.disabled = true;
+            } else if (status === 'approved') {
+                statusText.textContent = '✅ 승인됨 - 강사가 확인했습니다';
+                btn.textContent = '제출 완료';
+                btn.disabled = true;
+            }
+        }
+
+        // 에러 표시
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorText.textContent = message;
+            errorDiv.classList.add('active');
+        }
+
+        // 에러 숨기기
+        function hideError() {
+            document.getElementById('errorMessage').classList.remove('active');
+        }
+
+        // 성공 메시지 표시
+        function showSuccess() {
+            document.getElementById('successMessage').classList.add('active');
+        }
+
+        // 성공 메시지 숨기기
+        function hideSuccess() {
+            document.getElementById('successMessage').classList.remove('active');
+        }
+
+        // 토스트 알림
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastText = document.getElementById('toastText');
+
+            toastText.textContent = message;
+            toast.className = `toast ${type} active`;
+
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, 4000);
+        }
+
+        // 파일 크기 포맷
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        // 강사 승인 시뮬레이션 (데모용)
+        setTimeout(() => {
+            const chapter2 = document.querySelector('[data-chapter="2"]');
+            if (chapter2.classList.contains('waiting')) {
+                updateChapterStatus(2, 'approved');
+                showToast('챕터 2가 강사에 의해 승인되었습니다!', 'success');
+            }
+        }, 10000);
+    </script>
+</body>
+</html>

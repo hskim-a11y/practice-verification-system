@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>개선된 실습 인증 UI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #fafafa;
+            color: #3f4146;
+        }
+
+        .container {
+            max-width: 1440px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+
+        /* Title Bar */
+        .title-bar {
+            background: #fafafa;
+            border-bottom: 1px solid #e4e4e7;
+            padding: 8px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .title-bar-left {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .traffic-light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .traffic-light.red { background: #ec6a5e; }
+        .traffic-light.yellow { background: #f5c04f; }
+        .traffic-light.green { background: #61c555; }
+
+        .back-button {
+            margin-left: 16px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #3f4146;
+        }
+
+        .recording-status {
+            display: flex;
+            align-items: center;
+            gap: 5.6px;
+            margin-right: 8px;
+        }
+
+        .recording-dot {
+            width: 12px;
+            height: 12px;
+            background: #ff6900;
+            border-radius: 50%;
+        }
+
+        .recording-text {
+            font-size: 13px;
+            font-weight: 700;
+            color: #09090b;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 32px);
+        }
+
+        /* Navigation Bar */
+        .nav-bar {
+            flex: 1;
+            background: white;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-header {
+            padding: 24px 24px 8px;
+            border-bottom: 1px solid #f4f4f5;
+        }
+
+        .nav-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #09090b;
+            margin-bottom: 12px;
+        }
+
+        .add-custom-btn {
+            padding: 6px;
+            border: 1px solid #b5b5ba;
+            border-radius: 4px;
+            background: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .progress-bar-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .progress-bar {
+            width: 96px;
+            height: 12px;
+            background: #f4f4f5;
+            border-radius: 400px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #ff6900;
+            border-radius: 400px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: #3f4146;
+        }
+
+        /* Practice Area */
+        .practice-area {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Chapter */
+        .chapter {
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        /* Step Indicator - 개선된 상태 표시 */
+        .step-indicator {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            border: 1px solid #e4e4e7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .step-indicator.not-started {
+            background: #f4f4f5;
+            color: #71717a;
+        }
+
+        .step-indicator.in-progress {
+            background: #fff0d3;
+            border-color: #ff6900;
+            color: #ff6900;
+            position: relative;
+        }
+
+        .step-indicator.in-progress::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #ff6900;
+            border-radius: 50%;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .step-indicator.waiting {
+            background: #e0f2fe;
+            border-color: #0ea5e9;
+            color: #0ea5e9;
+        }
+
+        .step-indicator.completed {
+            background: #dcfce7;
+            border-color: #22c55e;
+            color: #22c55e;
+        }
+
+        .step-indicator.auto-verified {
+            background: #ddd6fe;
+            border-color: #8b5cf6;
+            color: #8b5cf6;
+        }
+
+        /* Text Area */
+        .text-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chapter-title-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chapter-title {
+            font-size: 16px;
+            color: #09090b;
+        }
+
+        .toggle-btn {
+            padding: 6px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .chapter-content {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chapter-content.collapsed {
+            display: none;
+        }
+
+        .instruction-list {
+            padding-left: 20px;
+            line-height: 1.5;
+            font-size: 14px;
+            color: #3f4146;
+        }
+
+        .instruction-list li {
+            margin-bottom: 4px;
+        }
+
+        /* 상태 배지 */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .status-badge.not-started {
+            background: #f4f4f5;
+            color: #71717a;
+        }
+
+        .status-badge.in-progress {
+            background: #fff0d3;
+            color: #ff6900;
+        }
+
+        .status-badge.waiting {
+            background: #e0f2fe;
+            color: #0ea5e9;
+        }
+
+        .status-badge.completed {
+            background: #dcfce7;
+            color: #22c55e;
+        }
+
+        .status-badge.auto-verified {
+            background: #ddd6fe;
+            color: #8b5cf6;
+        }
+
+        /* 개선된 인증 버튼 */
+        .verify-btn {
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .verify-btn.primary {
+            background: #ff6900;
+            color: white;
+            border: none;
+        }
+
+        .verify-btn.primary:hover {
+            background: #e65f00;
+        }
+
+        .verify-btn.secondary {
+            background: white;
+            color: #71717a;
+            border: 1px solid #e4e4e7;
+        }
+
+        .verify-btn.secondary:hover {
+            background: #f4f4f5;
+        }
+
+        .verify-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Chat UI */
+        .chat-ui {
+            width: 510px;
+            border-left: 1px solid #e4e4e7;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .chat-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid #e4e4e7;
+        }
+
+        .chat-tabs {
+            display: flex;
+            background: #f4f4f5;
+            border-radius: 8px;
+            padding: 6px;
+            gap: 4px;
+        }
+
+        .chat-tab {
+            flex: 1;
+            padding: 2px 4px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #71717a;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .chat-tab.active {
+            background: white;
+            color: #3f4146;
+            box-shadow: 0px 1px 2px 2px rgba(16,24,40,0.09);
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(16, 24, 40, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        /* 개선된 체크리스트 모달 */
+        .modal {
+            background: white;
+            border-radius: 16px;
+            width: 512px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            padding: 25px 25px 16px;
+            border-bottom: 1px solid #f4f4f5;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #09090b;
+            margin-bottom: 8px;
+        }
+
+        .modal-description {
+            font-size: 14px;
+            color: #71717a;
+            line-height: 1.5;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        /* 체크리스트 */
+        .checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            border: 1px solid #e4e4e7;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .checklist-item:hover {
+            background: #fafafa;
+        }
+
+        .checklist-item.checked {
+            background: #f0fdf4;
+            border-color: #22c55e;
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e4e4e7;
+            border-radius: 4px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .checklist-item.checked .checkbox {
+            background: #22c55e;
+            border-color: #22c55e;
+        }
+
+        .checkbox::after {
+            content: '✓';
+            color: white;
+            font-size: 14px;
+            display: none;
+        }
+
+        .checklist-item.checked .checkbox::after {
+            display: block;
+        }
+
+        .checklist-text {
+            flex: 1;
+            font-size: 14px;
+            color: #3f4146;
+            line-height: 1.5;
+        }
+
+        .auto-check-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: #f0f9ff;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+
+        .auto-check-status.success {
+            background: #f0fdf4;
+        }
+
+        .auto-check-status.error {
+            background: #fef2f2;
+        }
+
+        .auto-check-icon {
+            font-size: 16px;
+        }
+
+        .auto-check-text {
+            font-size: 13px;
+            color: #0369a1;
+            flex: 1;
+        }
+
+        .auto-check-status.success .auto-check-text {
+            color: #166534;
+        }
+
+        .auto-check-status.error .auto-check-text {
+            color: #991b1b;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 10px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-btn.primary {
+            background: #ff6900;
+            color: white;
+            border: none;
+        }
+
+        .modal-btn.primary:hover {
+            background: #e65f00;
+        }
+
+        .modal-btn.primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .modal-btn.secondary {
+            background: white;
+            color: #71717a;
+            border: 1px solid #e4e4e7;
+        }
+
+        .modal-btn.secondary:hover {
+            background: #f4f4f5;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 17px;
+            right: 17px;
+            width: 16px;
+            height: 16px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            opacity: 0.7;
+            font-size: 20px;
+            line-height: 1;
+            color: #71717a;
+        }
+
+        .close-btn:hover {
+            opacity: 1;
+        }
+
+        /* 진행률 표시 */
+        .completion-progress {
+            margin-top: 16px;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+
+        .progress-label {
+            font-size: 12px;
+            color: #71717a;
+            margin-bottom: 8px;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .progress-fraction {
+            color: #3f4146;
+            font-weight: 600;
+        }
+
+        .progress-percentage {
+            color: #ff6900;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Title Bar -->
+        <div class="title-bar">
+            <div class="title-bar-left">
+                <div class="traffic-light red"></div>
+                <div class="traffic-light yellow"></div>
+                <div class="traffic-light green"></div>
+                <button class="back-button">
+                    ← 목록으로
+                </button>
+            </div>
+            <div class="recording-status">
+                <div class="recording-dot"></div>
+                <span class="recording-text">녹화 중</span>
+            </div>
+        </div>
+
+        <!-- Main Layout -->
+        <div class="main-layout">
+            <!-- Navigation Bar -->
+            <div class="nav-bar">
+                <div class="nav-header">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <h1 class="nav-title">기본 실습</h1>
+                            <button class="add-custom-btn">+ 맞춤형 실습</button>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="totalProgress" style="width: 0%"></div>
+                            </div>
+                            <span class="progress-text" id="progressText">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="practice-area">
+                    <!-- Chapter 1 -->
+                    <div class="chapter" data-chapter="1">
+                        <div class="step-indicator completed" id="indicator-1">✓</div>
+                        <div class="text-area">
+                            <div class="chapter-title-wrapper">
+                                <h3 class="chapter-title">Google Cloud Platform 설정</h3>
+                                <button class="toggle-btn" onclick="toggleChapter(1)">▼</button>
+                            </div>
+                            <div class="chapter-content" id="content-1">
+                                <span class="status-badge completed">✓ 자동 인증 완료</span>
+                                <ol class="instruction-list">
+                                    <li>Google Forms에서 새 폼을 생성합니다.</li>
+                                    <li>우측 상단 응답 탭을 클릭하고, 스프레드시트로 응답 수집을 선택해 새 스프레드시트를 만듭니다.</li>
+                                    <li>생성된 스프레드시트의 URL을 메모해 둡니다. 이후 Apps Script에서 해당 스프레드시트를 열어 데이터를 기록합니다.</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chapter 2 -->
+                    <div class="chapter" data-chapter="2">
+                        <div class="step-indicator in-progress" id="indicator-2">2</div>
+                        <div class="text-area">
+                            <div class="chapter-title-wrapper">
+                                <h3 class="chapter-title">Google Forms & 스프레드시트 연결</h3>
+                                <button class="toggle-btn" onclick="toggleChapter(2)">▼</button>
+                            </div>
+                            <div class="chapter-content" id="content-2">
+                                <span class="status-badge in-progress">🔄 진행 중</span>
+                                <ol class="instruction-list">
+                                    <li>Google Forms에서 새 폼을 생성합니다.</li>
+                                    <li>우측 상단 응답 탭을 클릭하고, 스프레드시트로 응답 수집을 선택해 새 스프레드시트를 만듭니다.</li>
+                                    <li>생성된 스프레드시트의 URL을 메모해 둡니다. 이후 Apps Script에서 해당 스프레드시트를 열어 데이터를 기록합니다.</li>
+                                </ol>
+                                <button class="verify-btn primary" onclick="openVerificationModal(2)">
+                                    📋 실습 인증하기
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chapter 3 -->
+                    <div class="chapter" data-chapter="3">
+                        <div class="step-indicator not-started" id="indicator-3">3</div>
+                        <div class="text-area">
+                            <div class="chapter-title-wrapper">
+                                <h3 class="chapter-title">Apps Script 설정</h3>
+                                <button class="toggle-btn" onclick="toggleChapter(3)">▼</button>
+                            </div>
+                            <div class="chapter-content collapsed" id="content-3">
+                                <span class="status-badge not-started">⏸️ 시작 전</span>
+                                <ol class="instruction-list">
+                                    <li>스프레드시트에서 확장 프로그램 > Apps Script를 선택합니다.</li>
+                                    <li>새 프로젝트를 생성하고 코드를 작성합니다.</li>
+                                    <li>트리거를 설정하여 자동 실행되도록 합니다.</li>
+                                </ol>
+                                <button class="verify-btn secondary disabled">
+                                    🔒 이전 단계를 완료해주세요
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat UI -->
+            <div class="chat-ui">
+                <div class="chat-header">
+                    <div class="chat-tabs">
+                        <button class="chat-tab active">단체 대화</button>
+                        <button class="chat-tab">AI 튜터</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 개선된 체크리스트 기반 인증 모달 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <button class="close-btn" onclick="closeModal()">×</button>
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">실습 완료 확인</h2>
+                <p class="modal-description">
+                    아래 체크리스트를 확인하고, 모든 항목을 완료했는지 체크해주세요. 일부 항목은 자동으로 확인됩니다.
+                </p>
+            </div>
+            <div class="modal-body">
+                <!-- 자동 확인 상태 -->
+                <div class="auto-check-status" id="autoCheckStatus">
+                    <span class="auto-check-icon">🔍</span>
+                    <span class="auto-check-text">GCP 프로젝트 생성 여부를 자동으로 확인하고 있습니다...</span>
+                </div>
+
+                <!-- 체크리스트 -->
+                <div class="checklist" id="checklist">
+                    <!-- 체크리스트 항목은 JavaScript로 동적 생성 -->
+                </div>
+
+                <!-- 진행률 표시 -->
+                <div class="completion-progress">
+                    <div class="progress-label">완료 진행률</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="modalProgress" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-info">
+                        <span class="progress-fraction" id="progressFraction">0/0</span>
+                        <span class="progress-percentage" id="progressPercentage">0%</span>
+                    </div>
+                </div>
+
+                <!-- 액션 버튼 -->
+                <div class="modal-actions">
+                    <button class="modal-btn secondary" onclick="closeModal()">나중에 하기</button>
+                    <button class="modal-btn primary" id="confirmBtn" disabled onclick="confirmCompletion()">
+                        완료 확인
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 챕터별 체크리스트 데이터
+        const chapterChecklists = {
+            1: [
+                { id: 'gcp-project', text: 'GCP 프로젝트가 생성되었나요?', autoCheck: true },
+                { id: 'billing', text: '결제 계정이 연결되었나요?', autoCheck: false },
+                { id: 'api-enabled', text: '필요한 API가 활성화되었나요?', autoCheck: true }
+            ],
+            2: [
+                { id: 'form-created', text: 'Google Forms에서 새 폼을 생성했나요?', autoCheck: false },
+                { id: 'sheet-connected', text: '스프레드시트가 연결되었나요?', autoCheck: true },
+                { id: 'url-saved', text: '스프레드시트 URL을 메모했나요?', autoCheck: false }
+            ],
+            3: [
+                { id: 'script-opened', text: 'Apps Script를 열었나요?', autoCheck: false },
+                { id: 'code-written', text: '코드를 작성했나요?', autoCheck: false },
+                { id: 'trigger-set', text: '트리거를 설정했나요?', autoCheck: true }
+            ]
+        };
+
+        let currentChapter = null;
+        let checkedItems = new Set();
+
+        // 챕터 토글
+        function toggleChapter(chapterNum) {
+            const content = document.getElementById(`content-${chapterNum}`);
+            content.classList.toggle('collapsed');
+        }
+
+        // 인증 모달 열기
+        function openVerificationModal(chapterNum) {
+            currentChapter = chapterNum;
+            checkedItems.clear();
+
+            const modal = document.getElementById('modalOverlay');
+            const checklist = document.getElementById('checklist');
+            const modalTitle = document.getElementById('modalTitle');
+
+            modalTitle.textContent = `${chapterNum}단계: 실습 완료 확인`;
+
+            // 체크리스트 생성
+            checklist.innerHTML = '';
+            const items = chapterChecklists[chapterNum];
+
+            items.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'checklist-item';
+                div.dataset.id = item.id;
+                div.innerHTML = `
+                    <div class="checkbox"></div>
+                    <div class="checklist-text">
+                        ${item.text}
+                        ${item.autoCheck ? '<span style="color: #8b5cf6; font-size: 12px;"> • 자동 확인</span>' : ''}
+                    </div>
+                `;
+                div.onclick = () => toggleChecklistItem(item.id);
+                checklist.appendChild(div);
+            });
+
+            modal.classList.add('active');
+
+            // 자동 확인 시뮬레이션
+            simulateAutoCheck(chapterNum);
+            updateProgress();
+        }
+
+        // 자동 확인 시뮬레이션
+        function simulateAutoCheck(chapterNum) {
+            const autoCheckStatus = document.getElementById('autoCheckStatus');
+            const items = chapterChecklists[chapterNum];
+            const autoCheckItems = items.filter(item => item.autoCheck);
+
+            if (autoCheckItems.length === 0) {
+                autoCheckStatus.style.display = 'none';
+                return;
+            }
+
+            autoCheckStatus.style.display = 'flex';
+            autoCheckStatus.className = 'auto-check-status';
+            autoCheckStatus.innerHTML = `
+                <span class="auto-check-icon">🔍</span>
+                <span class="auto-check-text">자동 확인 중...</span>
+            `;
+
+            // 2초 후 자동 확인 완료 (실제로는 API 호출)
+            setTimeout(() => {
+                const allPassed = Math.random() > 0.3; // 70% 확률로 성공
+
+                if (allPassed) {
+                    autoCheckStatus.className = 'auto-check-status success';
+                    autoCheckStatus.innerHTML = `
+                        <span class="auto-check-icon">✅</span>
+                        <span class="auto-check-text">자동 확인 완료! ${autoCheckItems.length}개 항목이 확인되었습니다.</span>
+                    `;
+
+                    // 자동 확인 항목 체크
+                    autoCheckItems.forEach(item => {
+                        checkedItems.add(item.id);
+                        const element = document.querySelector(`[data-id="${item.id}"]`);
+                        if (element) element.classList.add('checked');
+                    });
+                } else {
+                    autoCheckStatus.className = 'auto-check-status error';
+                    autoCheckStatus.innerHTML = `
+                        <span class="auto-check-icon">⚠️</span>
+                        <span class="auto-check-text">일부 항목이 확인되지 않았습니다. 실습을 다시 확인해주세요.</span>
+                    `;
+                }
+
+                updateProgress();
+            }, 2000);
+        }
+
+        // 체크리스트 항목 토글
+        function toggleChecklistItem(itemId) {
+            const element = document.querySelector(`[data-id="${itemId}"]`);
+
+            if (checkedItems.has(itemId)) {
+                checkedItems.delete(itemId);
+                element.classList.remove('checked');
+            } else {
+                checkedItems.add(itemId);
+                element.classList.add('checked');
+            }
+
+            updateProgress();
+        }
+
+        // 진행률 업데이트
+        function updateProgress() {
+            if (!currentChapter) return;
+
+            const items = chapterChecklists[currentChapter];
+            const total = items.length;
+            const completed = checkedItems.size;
+            const percentage = Math.round((completed / total) * 100);
+
+            document.getElementById('modalProgress').style.width = percentage + '%';
+            document.getElementById('progressFraction').textContent = `${completed}/${total}`;
+            document.getElementById('progressPercentage').textContent = percentage + '%';
+
+            const confirmBtn = document.getElementById('confirmBtn');
+            if (completed === total) {
+                confirmBtn.disabled = false;
+            } else {
+                confirmBtn.disabled = true;
+            }
+        }
+
+        // 완료 확인
+        function confirmCompletion() {
+            if (!currentChapter) return;
+
+            const indicator = document.getElementById(`indicator-${currentChapter}`);
+            const content = document.getElementById(`content-${currentChapter}`);
+            const badge = content.querySelector('.status-badge');
+
+            // 상태 업데이트
+            indicator.className = 'step-indicator auto-verified';
+            indicator.textContent = '✓';
+
+            badge.className = 'status-badge auto-verified';
+            badge.textContent = '🎯 인증 완료';
+
+            // 다음 챕터 활성화
+            if (currentChapter < 3) {
+                const nextIndicator = document.getElementById(`indicator-${currentChapter + 1}`);
+                const nextContent = document.getElementById(`content-${currentChapter + 1}`);
+                const nextBadge = nextContent.querySelector('.status-badge');
+                const nextBtn = nextContent.querySelector('.verify-btn');
+
+                nextIndicator.className = 'step-indicator in-progress';
+                nextBadge.className = 'status-badge in-progress';
+                nextBadge.textContent = '🔄 진행 중';
+                nextBtn.className = 'verify-btn primary';
+                nextBtn.textContent = '📋 실습 인증하기';
+                nextBtn.onclick = () => openVerificationModal(currentChapter + 1);
+
+                nextContent.classList.remove('collapsed');
+            }
+
+            // 전체 진행률 업데이트
+            updateTotalProgress();
+
+            closeModal();
+
+            // 완료 알림
+            alert('🎉 실습이 인증되었습니다!');
+        }
+
+        // 전체 진행률 업데이트
+        function updateTotalProgress() {
+            const totalChapters = 3;
+            const completedChapters = document.querySelectorAll('.step-indicator.auto-verified, .step-indicator.completed').length;
+            const percentage = Math.round((completedChapters / totalChapters) * 100);
+
+            document.getElementById('totalProgress').style.width = percentage + '%';
+            document.getElementById('progressText').textContent = percentage + '%';
+        }
+
+        // 모달 닫기
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            currentChapter = null;
+            checkedItems.clear();
+        }
+
+        // 초기 진행률 설정 (챕터 1 완료 상태)
+        updateTotalProgress();
+    </script>
+</body>
+</html>

@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>실습 인증 - Figma 디자인</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f4f4f5;
+            color: #3f4146;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* 데모 버튼 */
+        .demo-btn {
+            padding: 16px 32px;
+            background: #ff6900;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255, 105, 0, 0.3);
+            transition: all 0.2s;
+        }
+
+        .demo-btn:hover {
+            background: #e65f00;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 105, 0, 0.4);
+        }
+
+        /* 모달 오버레이 */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(16, 24, 40, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.2s;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* 모달 (Figma 디자인 정확히 반영) */
+        .modal {
+            background: white;
+            border-radius: 12px;
+            width: 406px;
+            box-shadow: 0 20px 24px -4px rgba(16, 24, 40, 0.09),
+                        0 8px 8px -4px rgba(16, 24, 40, 0.09);
+            animation: slideUp 0.3s;
+            overflow: hidden;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* 모달 헤더 - 체크리스트 제목 */
+        .modal-header-label {
+            padding: 12px 24px 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-subtitle {
+            font-size: 13px;
+            font-weight: 700;
+            color: #71717a;
+            text-align: center;
+        }
+
+        /* 모달 본문 - 텍스트 설명 */
+        .modal-text-container {
+            padding: 24px 24px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #09090b;
+            line-height: 1.5;
+        }
+
+        .modal-description {
+            font-size: 14px;
+            color: #71717a;
+            line-height: 1.5;
+        }
+
+        /* 업로드 영역 컨테이너 */
+        .upload-container {
+            padding: 12px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 업로드 패널 */
+        .upload-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        /* 업로드 박스 (점선 테두리) */
+        .upload-wrapper {
+            background: #fafafa;
+            border: 1px dashed #e4e4e7;
+            border-radius: 6px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-wrapper:hover {
+            border-color: #ff6900;
+            background: #fff5ed;
+        }
+
+        .upload-wrapper.has-image {
+            padding: 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* 업로드 아이콘 */
+        .upload-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        .upload-icon svg {
+            width: 100%;
+            height: 100%;
+            stroke: #71717a;
+        }
+
+        /* 업로드 텍스트 */
+        .upload-text-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: center;
+            align-items: center;
+        }
+
+        .upload-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #3f4146;
+            line-height: 1.5;
+        }
+
+        .upload-hint {
+            font-size: 12px;
+            color: #71717a;
+            line-height: 1.5;
+        }
+
+        /* 스크린샷 찍기 버튼 */
+        .screenshot-button {
+            border: 1px solid #e4e4e7;
+            background: white;
+            padding: 6px;
+            border-radius: 4px;
+            display: inline-flex;
+            gap: 4px;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .screenshot-button:hover {
+            background: #fafafa;
+        }
+
+        .screenshot-button .icon {
+            width: 16px;
+            height: 16px;
+        }
+
+        .screenshot-button span {
+            font-size: 14px;
+            font-weight: 500;
+            color: #71717a;
+        }
+
+        /* 이미지 미리보기 */
+        .image-preview {
+            width: 100%;
+            border-radius: 6px;
+            display: none;
+            position: relative;
+        }
+
+        .image-preview.active {
+            display: block;
+        }
+
+        .preview-img {
+            width: 100%;
+            height: auto;
+            border-radius: 6px;
+            display: block;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.6);
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .remove-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        /* 이미지 업로드 다시하기 버튼 */
+        .reupload-button {
+            align-self: flex-end;
+            background: transparent;
+            border: none;
+            padding: 6px;
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .reupload-button:hover {
+            background: #f4f4f5;
+        }
+
+        .reupload-button .icon {
+            width: 16px;
+            height: 16px;
+        }
+
+        .reupload-button span {
+            font-size: 14px;
+            font-weight: 500;
+            color: #71717a;
+        }
+
+        /* 버튼 그룹 */
+        .button-group {
+            padding: 12px 24px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            flex: 1;
+            height: 44px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            line-height: 1.5;
+        }
+
+        .btn-cancel {
+            background: #fafafa;
+            border: 1px solid #b5b5ba;
+            color: #3f4146;
+        }
+
+        .btn-cancel:hover {
+            background: #f4f4f5;
+        }
+
+        .btn-submit {
+            background: #ff6900;
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background: #e65f00;
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-submit.loading {
+            position: relative;
+            color: transparent;
+        }
+
+        .btn-submit.loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin: -10px 0 0 -10px;
+            border: 2px solid white;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 파일 입력 숨김 */
+        .file-input {
+            display: none;
+        }
+
+        /* 업로드 진행 상태 */
+        .upload-progress {
+            display: none;
+            padding: 24px;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .upload-progress.active {
+            display: flex;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #f4f4f5;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #ff6900;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: #71717a;
+        }
+
+        /* 에러 메시지 */
+        .error-box {
+            margin: 0 24px 12px;
+            padding: 12px;
+            background: #fef2f2;
+            border-left: 3px solid #ef4444;
+            border-radius: 4px;
+            display: none;
+            gap: 8px;
+        }
+
+        .error-box.active {
+            display: flex;
+        }
+
+        .error-icon {
+            color: #ef4444;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .error-text {
+            font-size: 13px;
+            color: #991b1b;
+            line-height: 1.5;
+        }
+
+        /* 경고 박스 */
+        .warning-box {
+            margin: 0 24px 12px;
+            padding: 12px;
+            background: #fffbeb;
+            border-left: 3px solid #f59e0b;
+            border-radius: 4px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .warning-icon {
+            color: #f59e0b;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .warning-text {
+            font-size: 13px;
+            color: #92400e;
+            line-height: 1.5;
+        }
+
+        /* 토스트 */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #22c55e;
+            color: white;
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            display: none;
+            align-items: center;
+            gap: 12px;
+            z-index: 2000;
+            animation: slideIn 0.3s;
+        }
+
+        .toast.active {
+            display: flex;
+        }
+
+        .toast.error {
+            background: #ef4444;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(400px); }
+            to { transform: translateX(0); }
+        }
+
+        /* 확인 모달 */
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(16, 24, 40, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+        }
+
+        .confirm-overlay.active {
+            display: flex;
+        }
+
+        .confirm-dialog {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            width: 400px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        .confirm-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #09090b;
+            margin-bottom: 12px;
+        }
+
+        .confirm-message {
+            font-size: 14px;
+            color: #71717a;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .confirm-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+        }
+
+        .confirm-btn.cancel {
+            background: white;
+            border: 1px solid #e4e4e7;
+            color: #71717a;
+        }
+
+        .confirm-btn.ok {
+            background: #ef4444;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <button class="demo-btn" onclick="openModal()">📋 실습 인증하기 (모달 열기)</button>
+
+    <!-- 모달 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <!-- 체크리스트 제목 -->
+            <div class="modal-header-label">
+                <div class="modal-subtitle">체크리스트 1. Google Cloud  설정</div>
+            </div>
+
+            <!-- 설명 텍스트 -->
+            <div class="modal-text-container">
+                <div class="modal-title">미션을 수행한 후 스크린샷을 제출해주세요!</div>
+                <div class="modal-description">
+                    Google Forms에서 응답을 스프레드시트에 자동 저장되도록 설정하고, 연결된 Google Sheet 화면을 스크린샷으로 제출하세요.
+                </div>
+            </div>
+
+            <!-- 개인정보 경고 -->
+            <div class="warning-box">
+                <span class="warning-icon">🔒</span>
+                <div class="warning-text">
+                    <strong>제출 전 확인:</strong> 스크린샷에 개인정보(이메일, API 키 등)가 포함되지 않았는지 확인하세요.
+                </div>
+            </div>
+
+            <!-- 에러 메시지 -->
+            <div class="error-box" id="errorBox">
+                <span class="error-icon">⚠️</span>
+                <div class="error-text" id="errorText"></div>
+            </div>
+
+            <!-- 업로드 영역 -->
+            <div class="upload-container">
+                <div class="upload-panel">
+                    <!-- 업로드 박스 -->
+                    <div class="upload-wrapper" id="uploadWrapper" onclick="triggerFileInput()">
+                        <!-- 업로드 진행 중 -->
+                        <div class="upload-progress" id="uploadProgress">
+                            <div class="progress-text">업로드 중...</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                        </div>
+
+                        <!-- 기본 업로드 UI -->
+                        <div id="uploadUI">
+                            <!-- 업로드 아이콘 -->
+                            <div class="upload-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                            </div>
+
+                            <!-- 업로드 텍스트 -->
+                            <div class="upload-text-container">
+                                <div class="upload-title">이미지 파일을 업로드 해주세요.</div>
+                                <div class="upload-hint">사용가능한 확장자: JPEG, PNG</div>
+                            </div>
+
+                            <!-- 스크린샷 찍기 버튼 -->
+                            <button class="screenshot-button" onclick="event.stopPropagation(); captureScreenshot()">
+                                <div class="icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                                        <circle cx="12" cy="13" r="4"></circle>
+                                    </svg>
+                                </div>
+                                <span>스크린샷 찍기</span>
+                            </button>
+                        </div>
+
+                        <!-- 이미지 미리보기 -->
+                        <div class="image-preview" id="imagePreview">
+                            <img id="previewImg" class="preview-img" alt="미리보기">
+                            <button class="remove-btn" onclick="event.stopPropagation(); removeImage()">×</button>
+                        </div>
+                    </div>
+
+                    <!-- 이미지 업로드 다시하기 버튼 -->
+                    <button class="reupload-button" id="reuploadBtn" style="display: none;" onclick="triggerFileInput()">
+                        <div class="icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                                <circle cx="12" cy="13" r="4"></circle>
+                            </svg>
+                        </div>
+                        <span>이미지 업로드 다시하기</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 버튼 그룹 -->
+            <div class="button-group">
+                <div class="button-row">
+                    <button class="btn btn-cancel" onclick="attemptClose()">취소</button>
+                    <button class="btn btn-submit" id="submitBtn" disabled onclick="submitImage()">공유하기</button>
+                </div>
+            </div>
+
+            <input type="file" id="fileInput" class="file-input" accept="image/jpeg,image/png" onchange="handleFileSelect(event)">
+        </div>
+    </div>
+
+    <!-- 확인 모달 -->
+    <div class="confirm-overlay" id="confirmOverlay">
+        <div class="confirm-dialog">
+            <h3 class="confirm-title">정말 닫으시겠습니까?</h3>
+            <p class="confirm-message">업로드한 이미지가 저장되지 않습니다. 정말 닫으시겠습니까?</p>
+            <div class="confirm-actions">
+                <button class="confirm-btn cancel" onclick="cancelClose()">계속 작업하기</button>
+                <button class="confirm-btn ok" onclick="confirmClose()">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 토스트 -->
+    <div class="toast" id="toast">
+        <span id="toastText"></span>
+    </div>
+
+    <script>
+        let currentFile = null;
+        let hasUnsavedChanges = false;
+        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+        function openModal() {
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function attemptClose() {
+            if (hasUnsavedChanges) {
+                document.getElementById('confirmOverlay').classList.add('active');
+            } else {
+                closeModal();
+            }
+        }
+
+        function cancelClose() {
+            document.getElementById('confirmOverlay').classList.remove('active');
+        }
+
+        function confirmClose() {
+            document.getElementById('confirmOverlay').classList.remove('active');
+            closeModal();
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            resetModal();
+        }
+
+        function resetModal() {
+            currentFile = null;
+            hasUnsavedChanges = false;
+            document.getElementById('uploadUI').style.display = 'flex';
+            document.getElementById('uploadUI').style.flexDirection = 'column';
+            document.getElementById('uploadUI').style.alignItems = 'center';
+            document.getElementById('uploadUI').style.gap = '24px';
+            document.getElementById('imagePreview').classList.remove('active');
+            document.getElementById('reuploadBtn').style.display = 'none';
+            document.getElementById('uploadWrapper').classList.remove('has-image');
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('errorBox').classList.remove('active');
+            document.getElementById('uploadProgress').classList.remove('active');
+        }
+
+        function triggerFileInput() {
+            document.getElementById('fileInput').click();
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        // 드래그 앤 드롭
+        const uploadWrapper = document.getElementById('uploadWrapper');
+        uploadWrapper.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        uploadWrapper.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // 클립보드 붙여넣기
+        document.addEventListener('paste', (e) => {
+            if (!document.getElementById('modalOverlay').classList.contains('active')) return;
+
+            const items = e.clipboardData.items;
+            for (let item of items) {
+                if (item.type.indexOf('image') !== -1) {
+                    const file = item.getAsFile();
+                    handleFile(file);
+                    showToast('✓ 클립보드에서 이미지를 붙여넣었습니다!');
+                    break;
+                }
+            }
+        });
+
+        function handleFile(file) {
+            hideError();
+
+            // 파일 형식 검증
+            if (!['image/jpeg', 'image/png'].includes(file.type)) {
+                showError('JPEG 또는 PNG 형식의 이미지만 업로드 가능합니다.');
+                return;
+            }
+
+            // 파일 크기 검증
+            if (file.size > MAX_FILE_SIZE) {
+                showError(`파일 크기가 너무 큽니다. 최대 5MB까지 업로드 가능합니다.`);
+                return;
+            }
+
+            currentFile = file;
+            hasUnsavedChanges = true;
+
+            // 업로드 진행 시뮬레이션
+            simulateUpload(file);
+        }
+
+        function simulateUpload(file) {
+            document.getElementById('uploadProgress').classList.add('active');
+            document.getElementById('uploadUI').style.display = 'none';
+
+            const progressFill = document.getElementById('progressFill');
+            let progress = 0;
+
+            const interval = setInterval(() => {
+                progress += Math.random() * 30;
+                if (progress > 100) progress = 100;
+                progressFill.style.width = progress + '%';
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        document.getElementById('uploadProgress').classList.remove('active');
+                        showPreview(file);
+                    }, 300);
+                }
+            }, 150);
+        }
+
+        function showPreview(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('previewImg').src = e.target.result;
+                document.getElementById('imagePreview').classList.add('active');
+                document.getElementById('uploadWrapper').classList.add('has-image');
+                document.getElementById('reuploadBtn').style.display = 'flex';
+                document.getElementById('submitBtn').disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeImage() {
+            if (confirm('이미지를 삭제하시겠습니까?')) {
+                resetModal();
+            }
+        }
+
+        async function captureScreenshot() {
+            try {
+                const stream = await navigator.mediaDevices.getDisplayMedia({
+                    video: { mediaSource: 'screen' }
+                });
+
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                video.play();
+
+                video.onloadedmetadata = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(video, 0, 0);
+                    stream.getTracks().forEach(track => track.stop());
+
+                    canvas.toBlob((blob) => {
+                        const file = new File([blob], `screenshot-${Date.now()}.png`, { type: 'image/png' });
+                        handleFile(file);
+                    }, 'image/png');
+                };
+            } catch (error) {
+                if (error.name === 'NotAllowedError') {
+                    showError('화면 캡처 권한이 거부되었습니다.');
+                } else {
+                    showError('화면 캡처 중 오류가 발생했습니다.');
+                }
+            }
+        }
+
+        function submitImage() {
+            if (!currentFile) return;
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+
+            // 제출 시뮬레이션
+            setTimeout(() => {
+                const success = Math.random() > 0.2;
+
+                if (success) {
+                    hasUnsavedChanges = false;
+                    closeModal();
+                    showToast('✓ 실습 인증이 제출되었습니다! 강사가 곧 확인합니다.');
+                } else {
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                    showError('제출 중 오류가 발생했습니다. 다시 시도해주세요.');
+                }
+            }, 2000);
+        }
+
+        function showError(message) {
+            document.getElementById('errorText').textContent = message;
+            document.getElementById('errorBox').classList.add('active');
+        }
+
+        function hideError() {
+            document.getElementById('errorBox').classList.remove('active');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastText').textContent = message;
+            toast.classList.add('active');
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, 4000);
+        }
+
+        // ESC 키로 모달 닫기
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && document.getElementById('modalOverlay').classList.contains('active')) {
+                attemptClose();
+            }
+        });
+
+        // 외부 클릭으로 모달 닫기
+        document.getElementById('modalOverlay').addEventListener('click', (e) => {
+            if (e.target.id === 'modalOverlay') {
+                attemptClose();
+            }
+        });
+    </script>
+</body>
+</html>
