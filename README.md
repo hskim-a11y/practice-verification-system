@@ -26,12 +26,26 @@
 
 ```
 .
-├── practice-verification-full.html    # 최종 완성 버전 (메인 파일)
+├── index.html                         # GitHub Pages 배포용 (학생 화면)
+├── practice-verification-full.html    # 학생 화면 최종 버전
+├── instructor-view.html               # 강사 화면 (개발 중)
 ├── figma-screenshot-verification.html # Figma 디자인 기반 초기 버전
 ├── improved-practice-ui.html          # 개선된 UI 버전
 ├── screenshot-verification.html       # 스크린샷 검증 초기 버전
 └── README.md
 ```
+
+## 화면 구분
+
+### 학생 화면 (Student View)
+- `practice-verification-full.html` / `index.html`
+- 실습 인증 및 체크리스트 관리
+- 단체 채팅 및 AI 튜터 기능
+
+### 강사 화면 (Instructor View)
+- `instructor-view.html`
+- 학생 목록 및 진행도 관리
+- 제출된 실습 인증 검토 (개발 예정)
 
 ## 빠른 시작
 
