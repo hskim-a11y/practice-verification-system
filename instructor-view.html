@@ -93,7 +93,214 @@
             height: calc(100vh - 32px);
         }
 
-        /* Left Panel - Practice Area */
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background: #fafafa;
+            border-right: 1px solid #e4e4e7;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-section.instructor {
+            flex-shrink: 0;
+        }
+
+        .sidebar-section.students {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-section.dashboard {
+            flex-shrink: 0;
+        }
+
+        .section-title {
+            padding: 16px 24px 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #71717a;
+        }
+
+        .section-content {
+            padding: 8px;
+        }
+
+        /* Instructor Profile */
+        .instructor-profile {
+            background: #f4f4f5;
+            border-radius: 8px;
+            padding: 8px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .instructor-profile:hover {
+            background: #e4e4e7;
+        }
+
+        .instructor-profile.selected {
+            background: #e4e4e7;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #fff0d3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 600;
+            color: #71717a;
+            flex-shrink: 0;
+        }
+
+        .avatar.small {
+            width: 28px;
+            height: 28px;
+            font-size: 14px;
+        }
+
+        .profile-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .profile-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #09090b;
+        }
+
+        .profile-badge {
+            background: #ff6900;
+            color: white;
+            padding: 4px 6px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 400;
+            display: inline-block;
+            width: fit-content;
+        }
+
+        /* Student List */
+        .student-list-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 16px 8px;
+        }
+
+        .student-count {
+            font-size: 13px;
+            font-weight: 700;
+            color: #71717a;
+        }
+
+        .invite-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #3f4146;
+        }
+
+        .invite-btn:hover {
+            background: #f4f4f5;
+        }
+
+        .invite-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .student-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .student-item:hover {
+            background: #f4f4f5;
+        }
+
+        .student-item.selected {
+            background: #f4f4f5;
+        }
+
+        .student-info {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .student-name {
+            font-size: 14px;
+            color: #09090b;
+        }
+
+        .progress-badge {
+            background: #ff6900;
+            color: white;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        /* Dashboard Button */
+        .dashboard-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px 8px;
+            margin: 12px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #09090b;
+        }
+
+        .dashboard-btn:hover {
+            background: #f4f4f5;
+        }
+
+        .dashboard-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Middle Panel - Practice Area */
         .practice-panel {
             flex: 1;
             background: white;
@@ -145,7 +352,7 @@
             color: #3f4146;
         }
 
-        .custom-practice-btn {
+        .custom-practice-btn, .edit-practice-btn {
             display: inline-flex;
             align-items: center;
             gap: 4px;
@@ -160,8 +367,13 @@
             transition: all 0.2s;
         }
 
-        .custom-practice-btn:hover {
+        .custom-practice-btn:hover, .edit-practice-btn:hover {
             background: #fafafa;
+        }
+
+        .edit-practice-btn svg {
+            width: 16px;
+            height: 16px;
         }
 
         /* Practice Content */
@@ -187,13 +399,8 @@
             font-size: 14px;
             color: #71717a;
             flex-shrink: 0;
-            cursor: pointer;
+            cursor: default;
             transition: all 0.2s;
-        }
-
-        .step-indicator:not(.checked):hover {
-            background: #fff5ed;
-            border-color: #ff6900;
         }
 
         .step-indicator.checked {
@@ -205,7 +412,7 @@
 
         .step-indicator.checked::before {
             content: '';
-            display: block;
+            display: none;
             width: 16px;
             height: 16px;
             background-image: url('data:image/svg+xml,<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13.3346 4L6.0013 11.3333L2.66797 8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
@@ -306,6 +513,43 @@
 
         .instruction-list li {
             margin-bottom: 4px;
+        }
+
+        /* 인증 이미지 */
+        .verification-images {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .verification-image-item {
+            border: 1px solid #e4e4e7;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fafafa;
+        }
+
+        .verification-image-item img,
+        .verification-image-item svg {
+            width: 100%;
+            height: auto;
+            display: block;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .verification-image-item img:hover,
+        .verification-image-item svg:hover {
+            opacity: 0.9;
+        }
+
+        .verification-image-caption {
+            padding: 8px 12px;
+            font-size: 13px;
+            color: #71717a;
+            background: white;
+            border-top: 1px solid #e4e4e7;
         }
 
         .verify-btn {
@@ -1040,17 +1284,97 @@
 
     <!-- Main Container -->
     <div class="main-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Instructor Section -->
+            <div class="sidebar-section instructor">
+                <div class="section-title">강사 목록</div>
+                <div class="section-content">
+                    <div class="instructor-profile" onclick="switchToInstructorView()">
+                        <div class="avatar">AB</div>
+                        <div class="profile-info">
+                            <div class="profile-name">김한솔</div>
+                            <div class="profile-badge">강사로 참여</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Students Section -->
+            <div class="sidebar-section students">
+                <div class="student-list-header">
+                    <div class="student-count">학생 목록 (4명)</div>
+                    <button class="invite-btn">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M8 3v10M3 8h10"/>
+                        </svg>
+                        초대
+                    </button>
+                </div>
+                <div class="section-content">
+                    <div class="student-item" onclick="switchToStudentView('김민수', 3)">
+                        <div class="avatar small">AB</div>
+                        <div class="student-info">
+                            <div class="student-name">김민수</div>
+                            <div class="progress-badge">3</div>
+                        </div>
+                    </div>
+                    <div class="student-item" onclick="switchToStudentView('이영희', 2)">
+                        <div class="avatar small">CD</div>
+                        <div class="student-info">
+                            <div class="student-name">이영희</div>
+                            <div class="progress-badge">2</div>
+                        </div>
+                    </div>
+                    <div class="student-item" onclick="switchToStudentView('박지훈', 3)">
+                        <div class="avatar small">EF</div>
+                        <div class="student-info">
+                            <div class="student-name">박지훈</div>
+                            <div class="progress-badge">3</div>
+                        </div>
+                    </div>
+                    <div class="student-item" onclick="switchToStudentView('최수진', 1)">
+                        <div class="avatar small">GH</div>
+                        <div class="student-info">
+                            <div class="student-name">최수진</div>
+                            <div class="progress-badge">1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Section -->
+            <div class="sidebar-section dashboard">
+                <button class="dashboard-btn" onclick="location.href='dashboard.html'">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7" rx="1"/>
+                        <rect x="14" y="3" width="7" height="7" rx="1"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1"/>
+                    </svg>
+                    대시보드
+                </button>
+            </div>
+        </div>
+
         <!-- Practice Panel -->
         <div class="practice-panel">
             <div class="practice-header">
                 <div class="practice-title-row">
-                    <div class="practice-title">구글 폼 응답을 Gemini로 자동 분석하기</div>
-                    <button class="custom-practice-btn">+ 맞춤형 실습</button>
+                    <div class="practice-title" id="practiceTitle">김한솔의 기본 실습</div>
+                    <!-- Button will be dynamically shown/hidden based on view state -->
+                    <button class="custom-practice-btn" id="customPracticeBtn" style="display: none;">+ 맞춤형 실습</button>
+                    <button class="edit-practice-btn" id="editPracticeBtn" style="display: none;">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11.333 2A2.827 2.827 0 0 1 15 5.667L5.5 15.167l-4.667.5.5-4.667L11.333 2z"/>
+                        </svg>
+                        수정하기
+                    </button>
                     <div class="progress-container">
                         <div class="progress-bar-bg">
-                            <div class="progress-bar-fill" style="width: 0%"></div>
+                            <div class="progress-bar-fill" id="progressBarFill" style="width: 0%"></div>
                         </div>
-                        <span class="progress-text">0%</span>
+                        <span class="progress-text" id="progressText">0%</span>
                     </div>
                 </div>
             </div>
@@ -1058,7 +1382,7 @@
             <div class="practice-content">
                 <!-- Chapter 1 -->
                 <div class="chapter">
-                    <div class="step-indicator" id="stepIndicator1" onclick="openModal(1)">1</div>
+                    <div class="step-indicator" id="stepIndicator1">1</div>
                     <div class="chapter-content">
                         <div class="chapter-header">
                             <div class="chapter-title" id="chapterTitle1">
@@ -1083,14 +1407,23 @@
                                 <li>우측 상단 응답 탭을 클릭하고, 스프레드시트로 응답 수집을 선택해 새 스프레드시트를 만듭니다.</li>
                                 <li>생성된 스프레드시트의 URL을 메모해 둡니다. 이후 Apps Script에서 해당 스프레드시트를 열어 데이터를 기록합니다.</li>
                             </ol>
+                            <div class="verification-images" id="verificationImages1">
+                                <div class="verification-image-item">
+                                    <svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+                                        <rect width="800" height="450" fill="#f4f4f5"/>
+                                        <text x="50%" y="45%" font-family="Arial, sans-serif" font-size="18" fill="#71717a" text-anchor="middle" dominant-baseline="middle">Google Cloud Platform 설정</text>
+                                        <text x="50%" y="55%" font-family="Arial, sans-serif" font-size="14" fill="#a1a1aa" text-anchor="middle" dominant-baseline="middle">인증 스크린샷</text>
+                                    </svg>
+                                    <div class="verification-image-caption">제출일: 2025-01-20 14:30</div>
+                                </div>
+                            </div>
                         </div>
-                        <button class="verify-btn" id="verifyBtn1" onclick="openModal(1)">실습 인증하기</button>
                     </div>
                 </div>
 
                 <!-- Chapter 2 -->
                 <div class="chapter">
-                    <div class="step-indicator" id="stepIndicator2" onclick="openModal(2)">2</div>
+                    <div class="step-indicator" id="stepIndicator2">2</div>
                     <div class="chapter-content">
                         <div class="chapter-header">
                             <div class="chapter-title" id="chapterTitle2">
@@ -1115,14 +1448,23 @@
                                 <li>우측 상단 응답 탭을 클릭하고, 스프레드시트로 응답 수집을 선택해 새 스프레드시트를 만듭니다.</li>
                                 <li>생성된 스프레드시트의 URL을 메모해 둡니다. 이후 Apps Script에서 해당 스프레드시트를 열어 데이터를 기록합니다.</li>
                             </ol>
+                            <div class="verification-images" id="verificationImages2">
+                                <div class="verification-image-item">
+                                    <svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+                                        <rect width="800" height="450" fill="#f4f4f5"/>
+                                        <text x="50%" y="45%" font-family="Arial, sans-serif" font-size="18" fill="#71717a" text-anchor="middle" dominant-baseline="middle">Google Forms & 스프레드시트 연결</text>
+                                        <text x="50%" y="55%" font-family="Arial, sans-serif" font-size="14" fill="#a1a1aa" text-anchor="middle" dominant-baseline="middle">인증 스크린샷</text>
+                                    </svg>
+                                    <div class="verification-image-caption">제출일: 2025-01-21 10:15</div>
+                                </div>
+                            </div>
                         </div>
-                        <button class="verify-btn" id="verifyBtn2" onclick="openModal(2)">실습 인증하기</button>
                     </div>
                 </div>
 
                 <!-- Chapter 3 -->
                 <div class="chapter">
-                    <div class="step-indicator" id="stepIndicator3" onclick="openModal(3)">3</div>
+                    <div class="step-indicator" id="stepIndicator3">3</div>
                     <div class="chapter-content">
                         <div class="chapter-header">
                             <div class="chapter-title" id="chapterTitle3">
@@ -1147,8 +1489,17 @@
                                 <li>우측 상단 응답 탭을 클릭하고, 스프레드시트로 응답 수집을 선택해 새 스프레드시트를 만듭니다.</li>
                                 <li>생성된 스프레드시트의 URL을 메모해 둡니다. 이후 Apps Script에서 해당 스프레드시트를 열어 데이터를 기록합니다.</li>
                             </ol>
+                            <div class="verification-images" id="verificationImages3">
+                                <div class="verification-image-item">
+                                    <svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+                                        <rect width="800" height="450" fill="#f4f4f5"/>
+                                        <text x="50%" y="45%" font-family="Arial, sans-serif" font-size="18" fill="#71717a" text-anchor="middle" dominant-baseline="middle">Apps Script 배포 완료</text>
+                                        <text x="50%" y="55%" font-family="Arial, sans-serif" font-size="14" fill="#a1a1aa" text-anchor="middle" dominant-baseline="middle">인증 스크린샷</text>
+                                    </svg>
+                                    <div class="verification-image-caption">제출일: 2025-01-22 16:45</div>
+                                </div>
+                            </div>
                         </div>
-                        <button class="verify-btn" id="verifyBtn3" onclick="openModal(3)">실습 인증하기</button>
                     </div>
                 </div>
             </div>
@@ -1198,8 +1549,8 @@
         </div>
     </div>
 
-    <!-- Modal -->
-    <div class="modal-overlay" id="modalOverlay">
+    <!-- Modal removed for instructor view -->
+    <!-- <div class="modal-overlay" id="modalOverlay">
         <div class="modal">
             <div class="modal-header-label">
                 <div class="modal-subtitle" id="modalSubtitle">체크리스트 1. Google Cloud 설정</div>
@@ -1286,13 +1637,194 @@
 
             <input type="file" id="fileInput" class="file-input" accept="image/jpeg,image/png" onchange="handleFileSelect(event)">
         </div>
-    </div>
+    </div> -->
 
 
-    <!-- Toast -->
-    <div class="toast" id="toast"></div>
+    <!-- Toast removed for instructor view -->
+    <!-- <div class="toast" id="toast"></div> -->
 
     <script>
+        // View state management
+        // Possible states: 'instructor-own', 'instructor-student', 'student-own'
+        let currentViewState = 'instructor-own';
+        let currentStudentName = '';
+
+        // Initialize view state on load
+        window.addEventListener('DOMContentLoaded', function() {
+            // URL 파라미터에서 학생 이름 읽기
+            const urlParams = new URLSearchParams(window.location.search);
+            const studentName = urlParams.get('student');
+
+            if (studentName) {
+                // 학생 목록에서 클릭한 경우
+                // 학생별 진행도 데이터 (실제로는 서버에서 가져와야 함)
+                const studentProgress = {
+                    '김민수': 3,
+                    '이영희': 2,
+                    '박지훈': 3,
+                    '최수진': 1
+                };
+                const progress = studentProgress[studentName] || 0;
+                updateViewState('instructor-student', studentName, progress);
+            } else {
+                // instructor-profile에서 온 경우 (본인)
+                updateViewState('instructor-own', '김한솔');
+            }
+
+            initResizer();
+        });
+
+        function updateViewState(viewState, userName, progress = 0) {
+            currentViewState = viewState;
+            currentStudentName = userName;
+
+            const practiceTitle = document.getElementById('practiceTitle');
+            const customPracticeBtn = document.getElementById('customPracticeBtn');
+            const editPracticeBtn = document.getElementById('editPracticeBtn');
+            const progressBarFill = document.getElementById('progressBarFill');
+            const progressText = document.getElementById('progressText');
+            const verifiedBadges = document.querySelectorAll('.verified-badge');
+
+            // Update title
+            practiceTitle.textContent = `${userName}의 기본 실습`;
+
+            // Update progress
+            const progressPercent = Math.round((progress / 3) * 100);
+            progressBarFill.style.width = progressPercent + '%';
+            progressText.textContent = progressPercent + '%';
+
+            // Update step indicators based on progress
+            updateStepIndicators(progress);
+
+            // Show/hide buttons and badges based on view state
+            const chapterBodies = document.querySelectorAll('.chapter-body');
+            const instructionLists = document.querySelectorAll('.instruction-list');
+            const verificationImages = document.querySelectorAll('.verification-images');
+            const toggleBtns = document.querySelectorAll('.toggle-btn');
+
+            if (viewState === 'instructor-own') {
+                // Instructor viewing own practice: show edit button, hide images
+                customPracticeBtn.style.display = 'none';
+                editPracticeBtn.style.display = 'inline-flex';
+                chapterBodies.forEach(body => body.style.display = 'block');
+                instructionLists.forEach(list => list.style.display = 'block');
+                verificationImages.forEach(img => img.style.display = 'none');
+                toggleBtns.forEach(btn => btn.style.display = 'flex');
+            } else if (viewState === 'instructor-student') {
+                // Instructor viewing student's practice: show verification images only for checked chapters
+                customPracticeBtn.style.display = 'none';
+                editPracticeBtn.style.display = 'none';
+                chapterBodies.forEach(body => body.style.display = 'block');
+                instructionLists.forEach(list => list.style.display = 'none');
+                toggleBtns.forEach(btn => btn.style.display = 'none'); // Hide toggle buttons for students
+
+                // 각 chapter별로 체크 여부에 따라 인증 이미지 표시/숨김
+                for (let i = 1; i <= 3; i++) {
+                    const stepIndicator = document.getElementById('stepIndicator' + i);
+                    const verificationImage = document.getElementById('verificationImages' + i);
+                    if (stepIndicator && verificationImage) {
+                        if (stepIndicator.classList.contains('checked')) {
+                            verificationImage.style.display = 'flex';
+                        } else {
+                            verificationImage.style.display = 'none';
+                        }
+                    }
+                }
+            } else if (viewState === 'student-own') {
+                // Student viewing own practice: show custom practice button and images for checked chapters
+                customPracticeBtn.style.display = 'inline-flex';
+                editPracticeBtn.style.display = 'none';
+                chapterBodies.forEach(body => body.style.display = 'block');
+                instructionLists.forEach(list => list.style.display = 'block');
+                toggleBtns.forEach(btn => btn.style.display = 'flex');
+
+                // 각 chapter별로 체크 여부에 따라 인증 이미지 표시/숨김
+                for (let i = 1; i <= 3; i++) {
+                    const stepIndicator = document.getElementById('stepIndicator' + i);
+                    const verificationImage = document.getElementById('verificationImages' + i);
+                    if (stepIndicator && verificationImage) {
+                        if (stepIndicator.classList.contains('checked')) {
+                            verificationImage.style.display = 'flex';
+                        } else {
+                            verificationImage.style.display = 'none';
+                        }
+                    }
+                }
+            }
+
+            // Update selected state in sidebar
+            updateSidebarSelection(viewState);
+        }
+
+        function updateStepIndicators(progress) {
+            // Reset all step indicators
+            for (let i = 1; i <= 3; i++) {
+                const stepIndicator = document.getElementById('stepIndicator' + i);
+                const chapterTitle = document.getElementById('chapterTitle' + i);
+                const verifiedBadge = document.getElementById('badge' + i);
+
+                if (stepIndicator && chapterTitle) {
+                    const titleSpan = chapterTitle.querySelector('span');
+
+                    if (i <= progress) {
+                        // Mark as checked
+                        stepIndicator.classList.add('checked');
+                        stepIndicator.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13.3346 4L6.0013 11.3333L2.66797 8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+                        if (titleSpan) {
+                            titleSpan.style.textDecoration = 'line-through';
+                            titleSpan.style.color = '#71717a';
+                        }
+                        // Show verified badge for checked chapters
+                        if (verifiedBadge && currentViewState !== 'instructor-own') {
+                            verifiedBadge.style.display = 'inline-flex';
+                        }
+                    } else {
+                        // Mark as unchecked
+                        stepIndicator.classList.remove('checked');
+                        stepIndicator.textContent = i;
+                        if (titleSpan) {
+                            titleSpan.style.textDecoration = 'none';
+                            titleSpan.style.color = '#09090b';
+                        }
+                        // Hide verified badge for unchecked chapters
+                        if (verifiedBadge) {
+                            verifiedBadge.style.display = 'none';
+                        }
+                    }
+                }
+            }
+        }
+
+        function updateSidebarSelection(viewState) {
+            const instructorProfile = document.querySelector('.instructor-profile');
+            const studentItems = document.querySelectorAll('.student-item');
+
+            // Remove all selected states
+            if (instructorProfile) instructorProfile.classList.remove('selected');
+            studentItems.forEach(item => item.classList.remove('selected'));
+
+            // Add selected state based on view
+            if (viewState === 'instructor-own') {
+                if (instructorProfile) instructorProfile.classList.add('selected');
+            } else if (viewState === 'instructor-student') {
+                // Find and select the clicked student
+                studentItems.forEach(item => {
+                    const studentName = item.querySelector('.student-name').textContent;
+                    if (studentName === currentStudentName) {
+                        item.classList.add('selected');
+                    }
+                });
+            }
+        }
+
+        function switchToInstructorView() {
+            updateViewState('instructor-own', '김한솔', 0);
+        }
+
+        function switchToStudentView(studentName, progress) {
+            updateViewState('instructor-student', studentName, progress);
+        }
+
         let currentFile = null;
         let currentChapter = 1;
         const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -1731,7 +2263,7 @@
         }
 
         // 리사이저 기능
-        (function initResizer() {
+        function initResizer() {
             const resizer = document.getElementById('resizer');
             const chatPanel = document.getElementById('chatPanel');
 
@@ -1782,7 +2314,7 @@
                     document.body.style.userSelect = '';
                 }
             });
-        })();
+        }
 
         // 채팅 탭 전환
         let currentChatTab = 'group';
