@@ -334,6 +334,75 @@
             background: #f4f4f5;
         }
 
+        /* 업로드된 이미지 썸네일 */
+        .uploaded-image-container {
+            display: none;
+            margin-top: 12px;
+            padding: 12px;
+            background: #f4f4f5;
+            border-radius: 8px;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .uploaded-image-container.active {
+            display: flex;
+        }
+
+        .thumbnail-wrapper {
+            width: 80px;
+            height: 80px;
+            border-radius: 6px;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: white;
+            border: 1px solid #e4e4e7;
+        }
+
+        .thumbnail-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .thumbnail-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            background: white;
+            border: 1px solid #e4e4e7;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn.edit {
+            color: #3f4146;
+        }
+
+        .action-btn.delete {
+            color: #ef4444;
+            border-color: #fca5a5;
+        }
+
+        .action-btn:hover {
+            background: #fafafa;
+        }
+
+        .action-btn.delete:hover {
+            background: #fef2f2;
+        }
+
         /* Resizer */
         .resizer {
             width: 2px;
@@ -805,33 +874,42 @@
             background: rgba(0, 0, 0, 0.8);
         }
 
-        .reupload-btn {
-            align-self: flex-end;
-            background: transparent;
-            border: none;
-            padding: 6px 12px;
+        .image-action-buttons {
             display: none;
-            gap: 6px;
+            gap: 4px;
             align-items: center;
+            align-self: flex-end;
+        }
+
+        .image-action-buttons.active {
+            display: flex;
+        }
+
+        .reupload-btn, .recapture-btn {
+            background: white;
+            border: 1px solid #e4e4e7;
+            padding: 6px;
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            justify-content: center;
+            height: 28px;
             font-size: 14px;
             font-weight: 500;
             color: #71717a;
             cursor: pointer;
             border-radius: 4px;
+            transition: all 0.2s;
         }
 
-        .reupload-btn svg {
-            width: 18px;
-            height: 18px;
+        .reupload-btn svg, .recapture-btn svg {
+            width: 16px;
+            height: 16px;
             flex-shrink: 0;
         }
 
-        .reupload-btn.active {
-            display: flex;
-        }
-
-        .reupload-btn:hover {
-            background: #f4f4f5;
+        .reupload-btn:hover, .recapture-btn:hover {
+            background: #fafafa;
         }
 
         .upload-progress {
@@ -1085,6 +1163,15 @@
                             </ol>
                         </div>
                         <button class="verify-btn" id="verifyBtn1" onclick="openModal(1)">실습 완료하기</button>
+                        <div class="uploaded-image-container" id="uploadedImage1">
+                            <div class="thumbnail-wrapper">
+                                <img class="thumbnail-img" id="thumbnail1" alt="업로드된 이미지">
+                            </div>
+                            <div class="thumbnail-actions">
+                                <button class="action-btn edit" onclick="editImage(1)">수정하기</button>
+                                <button class="action-btn delete" onclick="deleteImage(1)">삭제</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1117,6 +1204,15 @@
                             </ol>
                         </div>
                         <button class="verify-btn" id="verifyBtn2" onclick="openModal(2)">실습 완료하기</button>
+                        <div class="uploaded-image-container" id="uploadedImage2">
+                            <div class="thumbnail-wrapper">
+                                <img class="thumbnail-img" id="thumbnail2" alt="업로드된 이미지">
+                            </div>
+                            <div class="thumbnail-actions">
+                                <button class="action-btn edit" onclick="editImage(2)">수정하기</button>
+                                <button class="action-btn delete" onclick="deleteImage(2)">삭제</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1149,6 +1245,15 @@
                             </ol>
                         </div>
                         <button class="verify-btn" id="verifyBtn3" onclick="openModal(3)">실습 완료하기</button>
+                        <div class="uploaded-image-container" id="uploadedImage3">
+                            <div class="thumbnail-wrapper">
+                                <img class="thumbnail-img" id="thumbnail3" alt="업로드된 이미지">
+                            </div>
+                            <div class="thumbnail-actions">
+                                <button class="action-btn edit" onclick="editImage(3)">수정하기</button>
+                                <button class="action-btn delete" onclick="deleteImage(3)">삭제</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1268,13 +1373,23 @@
                     </div>
                 </div>
 
-                <button class="reupload-btn" id="reuploadBtn" onclick="triggerFileInput()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                        <circle cx="12" cy="13" r="4"/>
-                    </svg>
-                    이미지 업로드 다시하기
-                </button>
+                <div class="image-action-buttons" id="imageActionButtons">
+                    <button class="reupload-btn" onclick="triggerFileInput()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        이미지 업로드 다시하기
+                    </button>
+                    <button class="recapture-btn" onclick="event.stopPropagation(); recaptureScreenshot()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                            <circle cx="12" cy="13" r="4"/>
+                        </svg>
+                        스크린샷 다시 찍기
+                    </button>
+                </div>
             </div>
 
             <div class="button-group">
@@ -1297,6 +1412,13 @@
         let currentChapter = 1;
         const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
+        // 각 챕터의 업로드된 이미지 데이터를 저장
+        const uploadedImages = {
+            1: null,
+            2: null,
+            3: null
+        };
+
         function toggleChapter(num) {
             const chapter = document.getElementById('chapter' + num);
             const btn = document.getElementById('toggleBtn' + num);
@@ -1304,10 +1426,10 @@
             btn.classList.toggle('expanded');
         }
 
-        function openModal(chapterNum) {
-            // 이미 인증 완료된 경우 모달을 열지 않음
+        function openModal(chapterNum, isEditMode = false) {
+            // 이미 인증 완료된 경우 모달을 열지 않음 (단, 수정 모드가 아닐 때만)
             const stepIndicator = document.getElementById('stepIndicator' + chapterNum);
-            if (stepIndicator && stepIndicator.classList.contains('checked')) {
+            if (!isEditMode && stepIndicator && stepIndicator.classList.contains('checked')) {
                 return;
             }
 
@@ -1335,9 +1457,13 @@
             currentFile = null;
             document.getElementById('uploadContent').style.display = 'flex';
             document.getElementById('imagePreview').classList.remove('active');
-            document.getElementById('reuploadBtn').classList.remove('active');
+            document.getElementById('imageActionButtons').classList.remove('active');
             document.getElementById('uploadWrapper').classList.remove('has-image');
-            document.getElementById('submitBtn').disabled = true;
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.classList.remove('loading'); // 로딩 상태 제거
+
             document.getElementById('errorBox').classList.remove('active');
             document.getElementById('uploadProgress').classList.remove('active');
 
@@ -1427,7 +1553,7 @@
                 document.getElementById('previewImg').src = e.target.result;
                 document.getElementById('imagePreview').classList.add('active');
                 document.getElementById('uploadWrapper').classList.add('has-image');
-                document.getElementById('reuploadBtn').classList.add('active');
+                document.getElementById('imageActionButtons').classList.add('active');
                 document.getElementById('submitBtn').disabled = false;
 
                 // 이미지 업로드 시 warning box 표시
@@ -1473,6 +1599,36 @@
             }
         }
 
+        // 스크린샷 다시 찍기 (이미지가 이미 업로드된 상태에서)
+        async function recaptureScreenshot() {
+            try {
+                const stream = await navigator.mediaDevices.getDisplayMedia({
+                    video: { mediaSource: 'screen' }
+                });
+
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                video.play();
+
+                video.onloadedmetadata = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    canvas.getContext('2d').drawImage(video, 0, 0);
+                    stream.getTracks().forEach(track => track.stop());
+
+                    canvas.toBlob((blob) => {
+                        handleFile(new File([blob], `screenshot-${Date.now()}.png`, { type: 'image/png' }));
+                        showToast('새로운 스크린샷이 캡처되었습니다!');
+                    }, 'image/png');
+                };
+            } catch (error) {
+                showError(error.name === 'NotAllowedError'
+                    ? '화면 캡처 권한이 거부되었습니다.'
+                    : '화면 캡처 중 오류가 발생했습니다.');
+            }
+        }
+
         function submitImage() {
             if (!currentFile) return;
 
@@ -1484,6 +1640,22 @@
                 const success = Math.random() > 0.2;
 
                 if (success) {
+                    // 이미지 데이터를 저장 (FileReader로 base64 변환)
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        uploadedImages[currentChapter] = e.target.result;
+
+                        // 썸네일 표시
+                        const thumbnailImg = document.getElementById('thumbnail' + currentChapter);
+                        const uploadedImageContainer = document.getElementById('uploadedImage' + currentChapter);
+
+                        if (thumbnailImg && uploadedImageContainer) {
+                            thumbnailImg.src = e.target.result;
+                            uploadedImageContainer.classList.add('active');
+                        }
+                    };
+                    reader.readAsDataURL(currentFile);
+
                     // 배지 표시
                     const badge = document.getElementById('badge' + currentChapter);
                     if (badge) {
@@ -1783,6 +1955,89 @@
                 }
             });
         })();
+
+        // 수정하기 기능 - 모달을 다시 열어서 이미지 재업로드
+        function editImage(chapterNum) {
+            openModal(chapterNum, true);
+
+            // 기존에 업로드한 이미지가 있으면 미리보기로 표시
+            if (uploadedImages[chapterNum]) {
+                // 약간의 지연을 두어 모달이 열린 후 이미지 표시
+                setTimeout(() => {
+                    const previewImg = document.getElementById('previewImg');
+                    const imagePreview = document.getElementById('imagePreview');
+                    const uploadContent = document.getElementById('uploadContent');
+                    const uploadWrapper = document.getElementById('uploadWrapper');
+                    const imageActionButtons = document.getElementById('imageActionButtons');
+                    const submitBtn = document.getElementById('submitBtn');
+                    const warningBox = document.querySelector('.warning-box');
+
+                    // 기존 이미지를 미리보기로 표시
+                    previewImg.src = uploadedImages[chapterNum];
+                    imagePreview.classList.add('active');
+                    uploadContent.style.display = 'none';
+                    uploadWrapper.classList.add('has-image');
+                    imageActionButtons.classList.add('active');
+                    submitBtn.disabled = false;
+
+                    // warning box 표시
+                    if (warningBox) {
+                        warningBox.classList.add('active');
+                    }
+
+                    // base64를 Blob으로 변환하여 currentFile에 설정
+                    fetch(uploadedImages[chapterNum])
+                        .then(res => res.blob())
+                        .then(blob => {
+                            currentFile = new File([blob], `image-${chapterNum}.png`, { type: 'image/png' });
+                        });
+                }, 100);
+            }
+        }
+
+        // 삭제 기능 - 실습 인증을 풀린 상태로 되돌리기
+        function deleteImage(chapterNum) {
+            if (!confirm('실습 인증을 취소하시겠습니까?\n업로드한 이미지가 삭제됩니다.')) {
+                return;
+            }
+
+            // 이미지 데이터 삭제
+            uploadedImages[chapterNum] = null;
+
+            // 썸네일 숨기기
+            const uploadedImageContainer = document.getElementById('uploadedImage' + chapterNum);
+            if (uploadedImageContainer) {
+                uploadedImageContainer.classList.remove('active');
+            }
+
+            // 배지 숨기기
+            const badge = document.getElementById('badge' + chapterNum);
+            if (badge) {
+                badge.classList.remove('active');
+            }
+
+            // 실습 완료하기 버튼 다시 표시
+            const verifyBtn = document.getElementById('verifyBtn' + chapterNum);
+            if (verifyBtn) {
+                verifyBtn.classList.remove('hidden');
+            }
+
+            // step indicator 체크 해제
+            const stepIndicator = document.getElementById('stepIndicator' + chapterNum);
+            const chapterTitle = document.getElementById('chapterTitle' + chapterNum);
+            if (stepIndicator) {
+                stepIndicator.classList.remove('checked');
+                stepIndicator.textContent = chapterNum;
+            }
+            if (chapterTitle) {
+                chapterTitle.classList.remove('checked');
+            }
+
+            // 프로그레스 바 업데이트
+            updateProgressBar();
+
+            showToast('실습 인증이 취소되었습니다.');
+        }
 
         // 채팅 탭 전환
         let currentChatTab = 'group';
