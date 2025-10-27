@@ -26,9 +26,12 @@
 
 ```
 .
-├── index.html                         # GitHub Pages 배포용 (학생 화면)
+├── index.html                         # Prototype Home (랜딩 페이지)
 ├── practice-verification-full.html    # 학생 화면 최종 버전
-├── instructor-view.html               # 강사 화면 (개발 중)
+├── dashboard.html                     # 강사 대시보드
+├── instructor-view.html               # 강사 - 학생별 상세 뷰
+├── student-page.html                  # 이전 index.html (백업)
+├── IMAGE_UPLOAD_GUIDE.md              # 이미지 업로드 가이드
 ├── figma-screenshot-verification.html # Figma 디자인 기반 초기 버전
 ├── improved-practice-ui.html          # 개선된 UI 버전
 ├── screenshot-verification.html       # 스크린샷 검증 초기 버전
@@ -37,15 +40,24 @@
 
 ## 화면 구분
 
-### 학생 화면 (Student View)
-- `practice-verification-full.html` / `index.html`
+### 🏠 랜딩 페이지 (Prototype Home)
+- `index.html`
+- 학생 Flow / 강사 Flow 선택 화면
+
+### 👨‍🎓 학생 화면 (Student View)
+- `practice-verification-full.html`
 - 실습 인증 및 체크리스트 관리
 - 단체 채팅 및 AI 튜터 기능
+- 5가지 이미지 업로드 방법 지원
 
-### 강사 화면 (Instructor View)
-- `instructor-view.html`
-- 학생 목록 및 진행도 관리
-- 제출된 실습 인증 검토 (개발 예정)
+### 👨‍🏫 강사 화면 (Instructor View)
+- `dashboard.html` - 학생 목록 대시보드
+  - 정렬 가능한 학생 테이블
+  - 인증 개수 기반 진행도 뱃지
+  - 학생별 상세 뷰 이동
+- `instructor-view.html` - 학생별 상세 뷰
+  - 학생별 체크리스트 및 인증 이미지 확인
+  - 1:1 채팅 기능
 
 ## 빠른 시작
 
